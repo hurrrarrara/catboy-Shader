@@ -114,7 +114,6 @@
 	{"label": "gl_VertexID", "type": "variable"},
 	{"label": "gl_InstanceID", "type": "variable"},
 	{"label": "gl_FragCoord", "type": "variable"},
-	{"label": "gl_FragColor", "type": "variable"},
 	{"label": "gl_FrontFacing", "type": "variable"},
 	{"label": "gl_PointCoord", "type": "variable"},
 	{"label": "gl_SampleID", "type": "variable"},
