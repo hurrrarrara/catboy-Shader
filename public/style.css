@@ -50,3 +50,11 @@ body {
 	background-color: #44475a;
 	color: #f8f8f2;
 }
+
+.cm-activeLine {
+	background-color: red;
+}
+
+::selected {
+	background-color: red;
+}

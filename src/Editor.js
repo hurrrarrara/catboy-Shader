@@ -1,12 +1,13 @@
 import { glsl } from "codemirror-lang-glsl"
 import { acceptCompletion, autocompletion } from "@codemirror/autocomplete";
 import { drawSelection, keymap } from "@codemirror/view";
-import { indentWithTab } from "@codemirror/commands";
+import { indentWithTab, insertTab } from "@codemirror/commands";
 import { EditorView, basicSetup } from "codemirror"
 import { EditorState } from "@codemirror/state";
 import { glslCompletion } from "./glslCompletion/glslCompletion";
 import { vim } from "@replit/codemirror-vim";
 import { dracula } from "thememirror";
+import { abyss, gruvboxDark, nord, tokyoNightDay } from "@fsegurai/codemirror-theme-bundle";
 
 
 
@@ -59,64 +60,58 @@ void main()
     outColor = vec4(col, d);
 }`;
 
+const overrideTheme = EditorView.theme({
+	"&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground": { backgroundColor: "#44475a" },
+	".cm-completionInfo": { fontSize: "0.8em", color: "#b5b6b7" }
+})
+
 
 export class Editor {
-	constructor() {
-		this.extensions = [
-			keymap.of([{ key: "Tab", run: acceptCompletion }, indentWithTab]),
-			glsl(),
-			drawSelection(),
-			vim(),
-			basicSetup,
-			autocompletion({ override: [glslCompletion] }),
-			dracula,
-		]
+	static extensions = [
+		keymap.of([{ key: "Tab", run: acceptCompletion }, { key: "Tab", run: insertTab, preventDefault: true }]),
+		glsl(),
+		drawSelection(),
+		basicSetup,
+		autocompletion({ override: [glslCompletion] }),
+		//gruvboxDark,
+		dracula,
+		overrideTheme
+	]
 
-		this.vertState = EditorState.create({
-			doc: defaultVertex,
-			extensions: this.extensions
-		})
-
-		this.fragState = EditorState.create({
-			doc: defaultFragment,
-			extensions: this.extensions
-		});
+	constructor(shader = null) {
+		this.shader = shader;
 
 		document.querySelector("#frag-btn").setAttribute("on", "");
+
 		this.view = new EditorView({
-			state: this.fragState,
+			state: this.shader.fragState,
 			parent: document.querySelector("#glsl-editor"),
 		})
+
 
 		document.querySelector("#vert-btn").addEventListener("click", (ev) => {
 			if (ev.target.hasAttribute("on")) { return; }
 			ev.target.setAttribute("on", "");
 			document.querySelector("#frag-btn").removeAttribute("on");
-			this.fragState = this.view.state;
-			this.view.setState(this.vertState);
+			this.shader.fragState = this.view.state;
+			this.view.setState(this.shader.vertState);
 		});
 		document.querySelector("#frag-btn").addEventListener("click", (ev) => {
 			if (ev.target.hasAttribute("on")) { return; }
 			ev.target.setAttribute("on", "");
 			document.querySelector("#vert-btn").removeAttribute("on");
-			this.vertState = this.view.state;
-			this.view.setState(this.fragState);
+			this.shader.vertState = this.view.state;
+			this.view.setState(this.shader.fragState);
 		})
 
 	}
 
-	get vert() {
+	save() {
 		if (document.querySelector("#vert-btn").hasAttribute("on")) {
-			return this.view.state.toJSON().doc;;
+			this.shader.vertState = this.view.state;
+		} else {
+			this.shader.fragState = this.view.state;
 		}
-		return this.vertState.toJSON().doc;;
-	}
-
-	get frag() {
-		if (document.querySelector("#frag-btn").hasAttribute("on")) {
-			return this.view.state.toJSON().doc;;
-		}
-		return this.fragState.toJSON().doc;;
 	}
 }
 
