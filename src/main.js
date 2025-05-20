@@ -1,178 +1,157 @@
-import { glsl } from "codemirror-lang-glsl"
-import { acceptCompletion, autocompletion } from "@codemirror/autocomplete";
-import { drawSelection, keymap } from "@codemirror/view";
-import { indentWithTab } from "@codemirror/commands";
-import { EditorView, basicSetup } from "codemirror"
-import { EditorState } from "@codemirror/state";
-import { glslCompletion } from "./glslCompletion/glslCompletion";
-import { vim } from "@replit/codemirror-vim";
-import { dracula } from "thememirror";
+import { Editor } from "./Editor";
 
 
-/** @type {EditorView}*/
-const defaultExtensions = [keymap.of([{ key: "Tab", run: acceptCompletion }, indentWithTab]),
-glsl(),
-drawSelection(),
-vim(),
-	basicSetup,
-autocompletion({ override: [glslCompletion] }),
-	dracula,
-]
+// class RenderTarget {
+// 	resolution;
+// 	format;
+// 	clear;
+// 	clearColor;
+// 	dirty;
+// }
+//
+// class Shader {
+// 	vert;
+// 	frag;
+// 	program;
+// 	sampler;
+// 	dirty;
+// }
+//
+// class Pass {
+// 	shader;
+// 	rt;
+// 	id;
+// 	enabled;
+// 	dirty;
+// }
 
-const view = new EditorView({
-	doc: "Start document",
-	parent: document.getElementById("glsl_editor"),
-	extensions: defaultExtensions
-})
+const editor = new Editor();
 
-const s = view.state;
+class Render {
+	constructor() {
+		/** @type {HTMLCanvasElement}*/
+		this.canvas = document.querySelector("#gl-canvas");
 
-const state = EditorState.create({
-	doc: "OUAI",
-	extensions: defaultExtensions
-})
+		/** @type {WebGLRenderingContext}*/
+		this.gl = this.canvas.getContext("webgl2");
 
-let b = false;
+		if (this.gl === null) {
+			console.warn("Unable to initialize WebGL2. Your browser or machine may not support it.");
+			return;
+		}
 
-document.querySelector("#ouai").addEventListener("click", () => {
-	if (!b) {
-		view.setState(state);
-		b = true;
+		this.gl.clearColor(0., 0., 0., 1.);
+		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+
+		document.querySelector("#gl-compile").addEventListener("click", () => {
+			this.compile();
+			this.draw();
+		})
+
 	}
-	else {
-		console.log(view.state.doc.toString());
-		b = false;
+
+	createShader(type, source) {
+		const shader = this.gl.createShader(type);
+		this.gl.shaderSource(shader, source);
+		this.gl.compileShader(shader);
+		const succes = this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS);
+		if (succes) { return shader };
+
+		console.warn(this.gl.getShaderInfoLog(shader));
+		this.error(this.gl.getShaderInfoLog(shader));
+		this.gl.deleteShader(shader);
+		return null;
 	}
-});
 
-class RenderTarget {
-	resolution;
-	format;
-	clear;
-	clearColor;
-	dirty;
+	createProgram() {
+		if (this.program) { this.gl.deleteProgram(this.program) }
+		const program = this.gl.createProgram();
+		this.gl.attachShader(program, this.vert);
+		this.gl.attachShader(program, this.frag);
+		this.gl.linkProgram(program);
+		const success = this.gl.getProgramParameter(program, this.gl.LINK_STATUS);
+		if (success) { return program };
+
+		console.warn(this.gl.getProgramInfoLog(program));
+		this.error(this.gl.getProgramInfoLog(program));
+		this.gl.deleteProgram(program);
+		return null;
+	}
+
+	compile() {
+		if (this.vert) { this.gl.deleteShader(this.vert) };
+		this.vert = this.createShader(this.gl.VERTEX_SHADER, editor.vert);
+		if (this.frag) { this.gl.deleteShader(this.frag) };
+		this.frag = this.createShader(this.gl.FRAGMENT_SHADER, editor.frag);
+		if (!this.vert || !this.frag) {
+			if (this.vert) { this.gl.deleteShader(this.vert) };
+			if (this.frag) { this.gl.deleteShader(this.frag) };
+			return;
+		}
+
+		this.program = this.createProgram();
+		if (!this.program) {
+			this.gl.deleteShader(this.vert);
+			this.gl.deleteShader(this.frag);
+			return;
+		}
+
+		if (this.screenQuadVBO == null) {
+			var verts = [
+				// First triangle:
+				1.0, 1.0,
+				-1.0, 1.0,
+				-1.0, -1.0,
+				// Second triangle:
+				-1.0, -1.0,
+				1.0, -1.0,
+				1.0, 1.0
+			];
+			this.screenQuadVBO = this.gl.createBuffer();
+			this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.screenQuadVBO);
+			this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(verts), this.gl.STATIC_DRAW);
+		}
+
+		const positionAttributeLocation = this.gl.getAttribLocation(this.program, "a_position");
+		this.gl.vertexAttribPointer(positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
+		this.gl.enableVertexAttribArray(positionAttributeLocation);
+
+		this.timeLocation = this.gl.getUniformLocation(this.program, "time");
+		this.resolutionLocation = this.gl.getUniformLocation(this.program, "resolution");
+		this.gl.useProgram(this.program);
+		this.error('')
+	}
+
+	draw() {
+		this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+		try {
+			this.gl.uniform1f(this.timeLocation, Date.now() * 0.001 - start);
+			this.gl.uniform2f(this.resolutionLocation, this.gl.canvas.width, this.gl.canvas.height);
+		} catch (err) { console.warn(err) };
+		// this.gl.useProgram(this.program);
+		this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+		window.requestAnimationFrame(() => {
+			this.draw();
+		})
+
+	}
+
+	error(error) {
+		document.querySelector('#gl-console').innerHTML = error;
+	}
 }
 
-class Shader {
-	vert;
-	frag;
-	program;
-	sampler;
-	dirty;
-}
 
-class Pass {
-	shader;
-	rt;
-	id;
-	enabled;
-	dirty;
-}
-
-const vertexShaderSource = `#version 300 es
-     
-    // an attribute is an input (in) to a vertex shader.
-    // It will receive data from a buffer
-    in vec4 a_position;
-     
-    // all shaders have a main function
-    void main() {
-     
-      // gl_Position is a special variable a vertex shader
-      // is responsible for setting
-      gl_Position = a_position;
-    }
-    `;
-
-const fragmentShaderSource = `#version 300 es
-     
-    // fragment shaders don't have a default precision so we need
-    // to pick one. highp is a good default. It means "high precision"
-    precision highp float;
-     
-    // we need to declare an output for the fragment shader
-    out vec4 outColor;
-     
-    void main() {
-      // Just set the output to a constant reddish-purple
-      outColor = vec4(1, 0, 0.5, 1);
-    }
-    `;
-
-function createShader(gl, type, source) {
-	const shader = gl.createShader(type);
-	gl.shaderSource(shader, source);
-	gl.compileShader(shader);
-	const succes = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-	if (succes) { return shader };
-
-	console.warn(gl.getShaderInfoLog(shader));
-	gl.deleteShader(shader);
-	return null;
-}
-
-function createProgram(gl, vert, frag) {
-	const program = gl.createProgram();
-	gl.attachShader(program, vert);
-	gl.attachShader(program, frag);
-	gl.linkProgram(program);
-	const success = gl.getProgramParameter(program, gl.LINK_STATUS);
-	if (success) { return program };
-
-	console.warn(gl.getProgramInfoLog(program));
-	gl.deleteProgram(program);
-	return null;
-}
-
+const start = Date.now() * 0.001;
 
 function main() {
-	/** @type {HTMLCanvasElement}*/
-	const canvas = document.querySelector("#gl-canvas");
+	const render = new Render();
 
-	/** @type {WebGLRenderingContext}*/
-	const gl = canvas.getContext("webgl2");
+	render.compile();
 
-	if (gl === null) {
-		console.warn("Unable to initialize WebGL2. Your browser or machine may not support it.");
-		return;
-	}
-
-	gl.clearColor(.0, 0., 0., 1.);
-	gl.clear(gl.COLOR_BUFFER_BIT);
-
-	const vert = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-	const frag = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-
-	const program = createProgram(gl, vert, frag);
-
-	const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-	const positionBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-	const positions = [
-		0, 0,
-		0, 0.5,
-		0.7, 0,
-	];
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-	const vao = gl.createVertexArray();
-	gl.bindVertexArray(vao);
-	gl.enableVertexAttribArray(positionAttributeLocation);
-
-	const size = 2;          // 2 components per iteration
-	const type = gl.FLOAT;   // the data is 32bit floats
-	const normalize = false; // don't normalize the data
-	const stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-	const offset = 0;        // start at the beginning of the buffer
-	gl.vertexAttribPointer(
-		positionAttributeLocation, size, type, normalize, stride, offset)
-	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-	gl.useProgram(program);
-	gl.bindVertexArray(vao);
-
-	const primitiveType = gl.TRIANGLES;
-	const offset2 = 0;
-	const count = 3;
-	gl.drawArrays(primitiveType, offset2, count);
+	window.requestAnimationFrame(() => {
+		render.draw();
+	})
 }
 
 main();

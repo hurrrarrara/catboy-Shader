@@ -1,0 +1,52 @@
+#editor {
+	position: absolute;
+	top: 1%;
+	left: 1%;
+}
+
+canvas {
+	position: absolute;
+	left: calc(99vw - 800px);
+	width: 800px;
+	height: 600px;
+	border: 2px solid #5d6b9a;
+
+}
+
+#gl-console {
+	position: absolute;
+	left: calc(99vw - 800px);
+	top: calc(600px + 2vh);
+	width: 800px;
+	height: calc(96vh - 600px);
+	background-color: #2d2f3f;
+	color: #f77681;
+}
+
+#gl-compile {
+	position: absolute;
+	top: 1%;
+	right: calc(800px + 2vw);
+}
+
+.cm-editor {
+	width: calc((97vw - 800px));
+	height: 94vh;
+	font-size: 1.3em;
+}
+
+body {
+	background-color: black;
+}
+
+.shader-btn {
+	color: #737683;
+	font-weight: bold;
+	background-color: #282a36;
+	border: none;
+}
+
+.shader-btn[on] {
+	background-color: #44475a;
+	color: #f8f8f2;
+}
