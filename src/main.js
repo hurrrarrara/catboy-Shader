@@ -46,7 +46,7 @@ function main() {
 		compile();
 	})
 
-	document.querySelectorAll(".move").forEach((elem) => {
+	document.querySelectorAll(".moved").forEach((elem) => {
 		draggable(elem);
 	})
 
@@ -56,12 +56,12 @@ function main() {
 
 function draggable(el) {
 	el.addEventListener('mousedown', function(e) {
-		var offsetX = e.clientX - parseInt(window.getComputedStyle(this).left);
-		var offsetY = e.clientY - parseInt(window.getComputedStyle(this).top);
+		var offsetX = e.clientX - parseInt(window.getComputedStyle(el.parentElement).left);
+		var offsetY = e.clientY - parseInt(window.getComputedStyle(el.parentElement).top);
 
 		function mouseMoveHandler(e) {
-			el.style.top = (e.clientY - offsetY) + 'px';
-			el.style.left = (e.clientX - offsetX) + 'px';
+			el.parentElement.style.top = (e.clientY - offsetY) + 'px';
+			el.parentElement.style.left = (e.clientX - offsetX) + 'px';
 		}
 
 

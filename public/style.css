@@ -18,10 +18,10 @@
 	top: 1%;
 }
 
-/* .move:hover { */
-/* 	resize: both; */
-/* 	overflow: hidden; */
-/* } */
+.move:hover {
+	resize: both;
+	overflow: hidden;
+}
 
 canvas {
 	/* position: absolute; */
