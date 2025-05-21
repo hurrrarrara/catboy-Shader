@@ -61,7 +61,7 @@ export class Shader {
 
 		this.timeLocation = Engine.gl.getUniformLocation(this.program, "time");
 		this.resolutionLocation = Engine.gl.getUniformLocation(this.program, "resolution");
-		this.mousePosLocation = Engine.gl.getUniformLocation(this.program, "mousePos");
+		this.mousePosLocation = Engine.gl.getUniformLocation(this.program, "mouse");
 
 		Engine.gl.useProgram(this.program);
 		this.error = '';

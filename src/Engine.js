@@ -35,8 +35,8 @@ class EngineC {
 		this.rect = this.canvas.getBoundingClientRect();
 
 		this.canvas.addEventListener("mousemove", (e) => {
-			this.mousePos.x = ((e.clientX - this.rect.left) / (this.rect.width)) * 2.0 - 1.0;
-			this.mousePos.y = ((e.clientY - this.rect.top) / (this.rect.height)) * 2.0 - 1.0;
+			this.mousePos.x = ((e.clientX - this.rect.left) / (this.rect.width));
+			this.mousePos.y = ((e.clientY - this.rect.top) / (this.rect.height));
 		})
 
 		this.canvas.addEventListener("mouseleave", () => {

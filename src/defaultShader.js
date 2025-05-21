@@ -25,7 +25,7 @@ out vec4 outColor;
 //Default Uniforms availabled in every shaders
 uniform float	time; //time in ms
 uniform vec2	resolution; //resolution of FrameBuffer
-uniform vec2	mousePos; // cursor position over canvas x: [-1, 1], y: [-1, 1]
+uniform vec2	mouse; // cursor position over canvas [0,0]:[left,top]
 
 #define FALLING_SPEED  1.
 #define STRIPES_FACTOR 10.0
@@ -39,8 +39,8 @@ float sphere(vec2 coord, vec2 pos, float r) {
 //main
 void main()
 {
-    float fallingSpeed = FALLING_SPEED * (mousePos.y * 0.5 + 0.5);
-    float stripesFactor = STRIPES_FACTOR * (mousePos.x * 0.5 + 0.5);
+    float fallingSpeed = FALLING_SPEED * (mouse.y * 0.5 + 0.5);
+    float stripesFactor = STRIPES_FACTOR * (mouse.x * 0.5 + 0.5);
     //normalize pixel coordinates
     vec2 uv         =  gl_FragCoord.xy / resolution;
     //pixellize uv
