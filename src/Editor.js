@@ -66,7 +66,7 @@ const overrideTheme = EditorView.theme({
 })
 
 
-export class Editor {
+export class EditorC {
 	static extensions = [
 		keymap.of([{ key: "Tab", run: acceptCompletion }, { key: "Tab", run: insertTab, preventDefault: true }]),
 		glsl(),
@@ -78,40 +78,92 @@ export class Editor {
 		overrideTheme
 	]
 
+	#shader = null;
+
 	constructor(shader = null) {
-		this.shader = shader;
+		this.#shader = shader;
 
 		document.querySelector("#frag-btn").setAttribute("on", "");
 
-		this.view = new EditorView({
-			state: this.shader.fragState,
-			parent: document.querySelector("#glsl-editor"),
-		})
+		if (shader) {
+			this.view = new EditorView({
+				state: this.#shader.fragState,
+				parent: document.querySelector("#glsl-editor"),
+			})
+		} else {
+			this.view = null
+		}
+		// (document.querySelector("#vert-btn")).onclick = (ev) => {
+		// 	if (ev.target.hasAttribute("on")) { return; }
+		// 	ev.target.setAttribute("on", "");
+		// 	document.querySelector("#frag-btn").removeAttribute("on");
+		// 	this.#shader.fragState = this.view.state;
+		// 	this.view.setState(this.#shader.vertState);
+		// }
 
-
-		document.querySelector("#vert-btn").addEventListener("click", (ev) => {
-			if (ev.target.hasAttribute("on")) { return; }
-			ev.target.setAttribute("on", "");
-			document.querySelector("#frag-btn").removeAttribute("on");
-			this.shader.fragState = this.view.state;
-			this.view.setState(this.shader.vertState);
-		});
-		document.querySelector("#frag-btn").addEventListener("click", (ev) => {
-			if (ev.target.hasAttribute("on")) { return; }
-			ev.target.setAttribute("on", "");
-			document.querySelector("#vert-btn").removeAttribute("on");
-			this.shader.vertState = this.view.state;
-			this.view.setState(this.shader.fragState);
-		})
+		// document.querySelector("#vert-btn").addEventListener("click", (ev) => {
+		// 	if (ev.target.hasAttribute("on")) { return; }
+		// 	ev.target.setAttribute("on", "");
+		// 	document.querySelector("#frag-btn").removeAttribute("on");
+		// 	this.#shader.fragState = this.view.state;
+		// 	this.view.setState(this.#shader.vertState);
+		// });
+		// (document.querySelector("#frag-btn")).onclick = (ev) => {
+		// 	if (ev.target.hasAttribute("on")) { return; }
+		// 	ev.target.setAttribute("on", "");
+		// 	document.querySelector("#vert-btn").removeAttribute("on");
+		// 	this.#shader.vertState = this.view.state;
+		// 	this.view.setState(this.#shader.fragState);
+		// }
+		// document.querySelector("#frag-btn").addEventListener("click", (ev) => {
+		// 	if (ev.target.hasAttribute("on")) { return; }
+		// 	ev.target.setAttribute("on", "");
+		// 	document.querySelector("#vert-btn").removeAttribute("on");
+		// 	this.#shader.vertState = this.view.state;
+		// 	this.view.setState(this.#shader.fragState);
+		// })
 
 	}
 
 	save() {
+		if (!this.#shader) { return }
 		if (document.querySelector("#vert-btn").hasAttribute("on")) {
-			this.shader.vertState = this.view.state;
+			this.#shader.vertState = this.view.state;
 		} else {
-			this.shader.fragState = this.view.state;
+			this.#shader.fragState = this.view.state;
 		}
+	}
+
+	set shader(shader) {
+		if (this.view !== null) {
+			this.save();
+			this.#shader = shader;
+			this.view.setState(this.#shader.fragState);
+		}
+		else {
+			this.#shader = shader;
+			this.view = new EditorView({
+				state: this.#shader.fragState,
+				parent: document.querySelector("#glsl-editor"),
+			})
+		}
+		(document.querySelector("#frag-btn")).onclick = (ev) => {
+			if (ev.target.hasAttribute("on")) { return; }
+			ev.target.setAttribute("on", "");
+			document.querySelector("#vert-btn").removeAttribute("on");
+			this.#shader.vertState = this.view.state;
+			this.view.setState(this.#shader.fragState);
+		}
+		(document.querySelector("#vert-btn")).onclick = (ev) => {
+			if (ev.target.hasAttribute("on")) { return; }
+			ev.target.setAttribute("on", "");
+			document.querySelector("#frag-btn").removeAttribute("on");
+			this.#shader.fragState = this.view.state;
+			this.view.setState(this.#shader.vertState);
+		}
+
+
 	}
 }
 
+export const Editor = new EditorC(null);

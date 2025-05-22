@@ -78,3 +78,7 @@ body {
 ::selected {
 	background-color: red;
 }
+
+.shader-pass {
+	background-color: white;
+}

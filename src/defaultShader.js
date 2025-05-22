@@ -6,10 +6,13 @@ in vec4 position;
 
 uniform float  time;
 
+out vec2 uv;
+
 // all shaders have a main function
 void main() {
   // gl_Position is a special variable a vertex shader
   // is responsible for setting
+  uv = position.xy;
   gl_Position = position;
 }`;
 
@@ -27,37 +30,44 @@ uniform float	time; //time in ms
 uniform vec2	resolution; //resolution of FrameBuffer
 uniform vec2	mouse; // cursor position over canvas [0,0]:[left,top]
 
-#define FALLING_SPEED  1.
-#define STRIPES_FACTOR 10.0
+in vec2 uv;
 
-//get sphere
-float sphere(vec2 coord, vec2 pos, float r) {
-    vec2 d = pos - coord; 
-    return smoothstep(60.0, 0.0, dot(d, d) - r * r);
+/*
+ From https://www.shadertoy.com/view/3fGGzw
+*/
+
+vec3 HSL2RGB_CubicSmooth(in vec3 c)
+{
+    vec3 rgb = clamp(abs(mod(c.x+vec3(0.,4.,2.),6.)-3.)-1.,0.,1.);
+    rgb = rgb*rgb*(3.0-2.0*rgb); // iq's cubic smoothing.
+    return c.z+ c.y*(rgb-0.5)*(1.-abs(2.*c.z-1.));
 }
 
-//main
-void main()
-{
-    float fallingSpeed = FALLING_SPEED * (mouse.y * 0.5 + 0.5);
-    float stripesFactor = STRIPES_FACTOR * (mouse.x * 0.5 + 0.5);
-    //normalize pixel coordinates
-    vec2 uv         =  gl_FragCoord.xy / resolution;
-    //pixellize uv
-    vec2 clamped_uv = (round(gl_FragCoord.xy / stripesFactor) * stripesFactor) / resolution;
-    //get pseudo-random value for stripe height
-    float value		= fract(sin(clamped_uv.x) * 43758.5453123);
-    //create stripes
-    vec3 col        = vec3(1.0 - mod(uv.y * 0.5 + (time * (fallingSpeed + value / 5.0)) + value, 0.5));
-    //add color
-         col       *= clamp(cos(time * 2.0 + uv.xyx + vec3(0, 2, 4)), 0.0, 1.0);
-    //add glowing ends
-    	 col 	   += vec3(sphere(gl_FragCoord.xy, 
-                                  vec2(clamped_uv.x, (1.0 - 2.0 * mod((time * (fallingSpeed+ value / 5.0)) + value, 0.5))) * resolution, 
-                                  0.9)) / 2.0; 
-    //add screen fade
-         col       *= vec3(exp(-pow(abs(uv.y - 0.5), 6.0) / pow(2.0 * 0.05, 2.0)));
-    // Output to screen
-    outColor       = vec4(col,1.0);
+void main() {
+    float i,d,s,t=time * 0.1;
+    vec3  p = vec3(resolution, 0.);
+  	vec2 u = uv;
+  	vec4 o = vec4(0.);
+    
+    for(o*=i;
+        i++<1e2;
+        d += s = .03 + abs(.4-abs(p.x))*.3,
+        o += 1. /  s)
+        
+        for (s = .05, p = vec3(u* d,d+t);
+             s < .1;
+             p.yz *= mat2(cos(.01*t+vec4(0,33,11,0))),
+             p += cos(t+p.yzx*2.)*.1,
+             p += abs(dot(sin(6.*t+p.z+p * s * 32.), vec3(.006))) / s,
+             s += s);
+             
+    o.rgb *= 1.4 - HSL2RGB_CubicSmooth(vec3( 3. + sin(p.x*1.2 + u.y + t*6.5) *3.,
+                                             sin(p.z) /4. + sin(u.y*2.+t) *.1, 
+                                            .3 - abs(sin(u.y+t))*.15
+                                      )    );
+         
+    o = tanh(o*o / 1e7);
+  	outColor = o;
+  	outColor.a = 1.;
 }`;
 

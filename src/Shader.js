@@ -1,6 +1,6 @@
 import { EditorState } from "@codemirror/state";
 import { defaultFragment, defaultVertex } from "./defaultShader";
-import { Editor } from "./Editor";
+import { Editor, EditorC } from "./Editor";
 import { Engine } from "./Engine";
 // const uniforms = [
 // 	"float time",
@@ -9,20 +9,29 @@ import { Engine } from "./Engine";
 // ]
 
 export class Shader {
-	constructor(vert = null, frag = null) {
+	constructor(name, vert = null, frag = null) {
+		this.name = name;
 		this.vert = (vert ? vert : defaultVertex);
 		this.frag = (frag ? frag : defaultFragment);
+
+		this.elem = document.createElement("li");
+		this.elem.classList.add("shader-pass")
+		this.elem.innerText = this.name;
+		this.elem.addEventListener("click", () => {
+			Editor.shader = this;
+		})
+		document.querySelector("#shader-list").appendChild(this.elem)
 
 		/** @type {EditorState}*/
 		this.vertState = EditorState.create({
 			doc: this.vert,
-			extensions: Editor.extensions
+			extensions: EditorC.extensions
 		})
 
 		/** @type {EditorState}*/
 		this.fragState = EditorState.create({
 			doc: this.frag,
-			extensions: Editor.extensions
+			extensions: EditorC.extensions
 		});
 
 		this.samplers = [];
@@ -71,6 +80,9 @@ export class Shader {
 		Engine.gl.uniform1f(this.timeLocation, Engine.time);
 		Engine.gl.uniform2f(this.resolutionLocation, Engine.gl.canvas.width, Engine.gl.canvas.height);
 		Engine.gl.uniform2f(this.mousePosLocation, Engine.mousePos.x, Engine.mousePos.y);
+	}
+
+	focus() {
 	}
 
 }

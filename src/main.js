@@ -32,17 +32,13 @@ import { Shader } from "./Shader";
 const shaders = [];
 let compiledShaders = [];
 
-shaders.push(new Shader());
-
-const editor = new Editor(shaders[0]);
-
-
+shaders.push(new Shader("default"));
 
 function main() {
 	compile();
 
 	document.querySelector("#gl-compile").addEventListener("click", () => {
-		editor.save();
+		Editor.save();
 		compile();
 	})
 
