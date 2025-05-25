@@ -1,0 +1,236 @@
+#editor {
+	position: absolute;
+	top: 1%;
+	left: 1%;
+}
+
+
+
+.move {
+	z-index: 2;
+	min-height: 100px;
+	min-width: 100px;
+	width: 800px;
+	height: 600px;
+	position: absolute;
+	left: calc(99vw - 800px);
+	top: 1%;
+}
+
+.move:hover {
+	resize: both;
+	overflow: hidden;
+}
+
+canvas {
+	/* position: absolute; */
+	/* left: calc(99vw - 800px); */
+	width: 100%;
+	height: 100%;
+	/* width: 800px; */
+	/* height: 600px; */
+	border: 2px solid #5d6b9a;
+}
+
+#gl-console {
+	position: absolute;
+	left: calc(99vw - 800px);
+	top: calc(600px + 2vh);
+	width: 800px;
+	height: calc(96vh - 600px);
+	background-color: #2d2f3f;
+	color: #f77681;
+}
+
+#gl-compile {
+	position: absolute;
+	top: 1%;
+	right: calc(800px + 2vw);
+}
+
+.cm-editor {
+	width: calc((97vw - 800px));
+	height: 94vh;
+	font-size: 1.3em;
+}
+
+body {
+	background-color: black;
+}
+
+.shader-btn {
+	color: #737683;
+	font-weight: bold;
+	background-color: #282a36;
+	border: none;
+}
+
+.shader-btn[on] {
+	background-color: #44475a;
+	color: #f8f8f2;
+}
+
+.cm-activeLine {
+	background-color: red;
+}
+
+::selected {
+	background-color: red;
+}
+
+.shader-pass {
+	background-color: white;
+}
+
+#shader-top {
+	display: inline-flex;
+}
+
+/* #shader-top { */
+/* 	display: inline-flex; */
+/* 	overflow: hidden; */
+/* } */
+
+.shader-cont {
+	background-color: #000000;
+	display: inline-flex;
+	padding: 5px;
+	border: 2px solid;
+	border-radius: 7px;
+	border-color: black;
+	box-shadow: 0 0 0.5px 0 black inset, 0 0 0.5px 0 black;
+}
+
+.shader-cont:hover {
+	background-color: #333333;
+}
+
+.shader-cont[on] {
+	background-color: #666666;
+}
+
+.shader-cont[on] .shader-close {
+	opacity: 100%;
+
+}
+
+.shader-cont[on] .shader-name {
+	background: linear-gradient(to right, white, #aaa);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+
+}
+
+.shader-close {
+	height: 100%;
+	/* line-height: 100%; */
+	text-align: center;
+
+	border-color: transparent;
+	font-weight: bold;
+	opacity: 0;
+	color: white;
+	background: transparent;
+	border: none;
+	border: 2px solid;
+	border-radius: 7px;
+	border-color: #666666;
+}
+
+.shader-close:hover {
+	background-color: #999999;
+}
+
+.shader-name {
+	height: 100%;
+	margin-top: 2px;
+	text-align: center;
+	max-width: 50px;
+
+	color: white;
+	background: linear-gradient(to right, white, #999999);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	cursor: grab;
+	border: none;
+	overflow: hidden;
+}
+
+.shader-check {
+	color: blue;
+}
+
+#new-shader {
+	line-height: 0;
+	background-color: black;
+	text-align: center;
+	font-size: 2em;
+	color: white;
+	border: none;
+	font-weight: 300;
+	margin: 0;
+	margin-left: 2px;
+
+}
+
+#new-shader:hover {
+	background-color: #333;
+	border: 2px solid;
+	border-radius: 7px;
+	border-color: #333;
+	margin: 0;
+}
+
+#new-shader:active {
+	background-color: #666;
+	border: 2px solid;
+	border-radius: 7px;
+	border-color: #666;
+	margin: 0;
+
+}
+
+.popup {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: transparent;
+	z-index: 8;
+}
+
+.blocker {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	backdrop-filter: blur(10px);
+	z-index: 9;
+}
+
+.popup-text {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	z-index: 10;
+	color: white;
+	background-color: black;
+	font-size: 2em;
+	border-style: solid;
+	padding: 10px;
+
+
+	transform: translate(-50%, -50%);
+}
+
+#canvas-top {
+	width: 100%;
+	height: 20px;
+	cursor: move;
+	background-color: grey;
+	margin: 0;
+}

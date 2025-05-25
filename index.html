@@ -8,18 +8,49 @@
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
-    <div id="editor">
-      <ul id="shader-list"></ul>
-      <input id="new-shader" type="button" value="+"><br/>
-      <input id="vert-btn" class="shader-btn" type="button" value="Vertex">
-      <input id="frag-btn" class="shader-btn" type="button" value="Fragment">
-      <div id="glsl-editor" style="width: 100%; height:100%"></div>
+    <div id="editor-win" class="editor" style="display: none;">
+      <input id="vert-btn" class="shader-type" type="button" value="vertex">
+      <input id="frag-btn" class="shader-type" type="button" value="fragment">
+      <div id="editor" style="width: 100%; height:100%"></div>
+    </div> 
+    <div id="shader-list-win" class="window resize" tabindex="0">
+      <div class="top-bar drag">
+        <input id="new-shader" type="button" value="+">
+        <input class="minimize" type="button" value="-">
+      </div>
+      <div id="shader-list"></div>
     </div>
-    <input id="gl-compile" type="button" value="Compile">
-    <div class="move">
-      <canvas id="gl-canvas" class="moved" width="640" height="480"></canvas>
-      <div class="resize"></div>
+    <div id="shader-conf-win" class="window resize" tabindex="0">
+      <div class="top-bar drag">
+        <input class="minimize" type="button" value="-">
+      </div>
+      <div id="shader-conf"></div>
     </div>
-    <span id="gl-console"></span>
+    <div id="canvas-win" class="window resize" tabindex="0">
+      <div class="top-bar drag">
+        <input class="minimize" type="button" value="-">
+      </div>
+      <canvas  width="640" heigh="480"></canvas>
+    </div>
+    <div id="system-win" class="window resize" tabindex="0">
+      <div class="top-bar drag">
+        <input class="minimize" type="button" value="-">
+      </div>
+      <div id="system"></div>
+    </div>
+    <div id="error-win" class="window resize" tabindex="0">
+      <div class="top-bar drag">
+        <input class="minimize" type="button" value="-">
+      </div>
+      <div id="error"></div>
+    </div>
+    <div id="task-bar">
+      <input id="shader-list-task" class="task-btn" type="button" value="+">
+      <input id="shader-conf-task" class="task-btn" type="button" value="+">
+      <input id="canvas-task" class="task-btn" type="button" value="+">
+      <input id="system-task" class="task-btn" type="button" value="+">
+      <input id="error-task" class="task-btn" type="button" value="+">
+      <input id="all-task" class="task-btn" type="button" value="*">
+    </div>
   </body>
 </html>
